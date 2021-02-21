@@ -1,2 +1,3 @@
 # minecraft-docker
-Minecraft servers as docker containers
+
+A minecraft hosting environment powered by docker
