@@ -1,0 +1,114 @@
+version: "2"
+
+networks:
+  proxy:
+    driver: bridge
+  monitoring:
+    driver: bridge
+
+services:
+
+  registry:
+    restart: unless-stopped
+    image: registry:2
+    volumes:
+      - ${REGISTRY_VOLUME}:/var/lib/registry
+
+  filebrowser:
+    image: filebrowser/filebrowser
+    restart: unless-stopped
+    environment:
+      VIRTUAL_HOST: ${FILEBROWSER_DOMAIN}
+      LETSENCRYPT_HOST: ${FILEBROWSER_DOMAIN}
+    volumes:
+      - ${FILEBROWSER_VOLUME}:/srv
+    networks:
+      - proxy
+
+  proxy:
+    image: jwilder/nginx-proxy:alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DHPARAM_GENERATION: "false"
+    volumes:
+      - /etc/nginx/certs
+      - /etc/nginx/vhost.d
+      - /usr/share/nginx/html
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./config/client_max_body_size.conf:/etc/nginx/conf.d/client_max_body_size.conf:ro
+    networks:
+      - proxy
+      
+  letsencrypt:
+    image: jrcs/letsencrypt-nginx-proxy-companion
+    restart: unless-stopped
+    environment:
+      DEFAULT_EMAIL: ${LETSENCRYPT_EMAIL}
+    volumes_from:
+      - proxy
+    volumes:
+      - /etc/acme.sh
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+  prometheus:
+    image: prom/prometheus:v2.24.1
+    restart: unless-stopped
+    environment:
+      VIRTUAL_HOST: prometheus.thefipster.com
+      VIRTUAL_PORT: 9090
+      LETSENCRYPT_HOST: prometheus.thefipster.com
+    volumes:
+      - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - /opt/minecraft/hosting/prometheus/data:/prometheus
+    networks:
+      - monitoring
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    restart: unless-stopped
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--path.rootfs=/rootfs'
+      - '--collector.filesystem.ignored-mount-points="^(/rootfs|/host|)/(sys|proc|dev|host|etc)($$|/)"'
+      - '--collector.filesystem.ignored-fs-types="^(sys|proc|auto|cgroup|devpts|ns|au|fuse\.lxc|mqueue)(fs|)$$"'
+    networks:
+      - monitoring
+
+  cadvisor:
+    image: google/cadvisor:latest
+    restart: unless-stopped
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    networks:
+      - monitoring
+
+  grafana:
+    image: grafana/grafana:7.4.2
+    restart: unless-stopped
+    environment:
+      VIRTUAL_HOST: grafana.thefipster.com
+      VIRTUAL_PORT: 3000
+      LETSENCRYPT_HOST: grafana.thefipster.com
+      GF_SERVER_ROOT_URL: https://grafana.thefipster.com
+      GF_SECURITY_ADMIN_USER: bobama420
+      GF_SECURITY_ADMIN_PASSWORD: start123X
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    networks:
+      - monitoring
+      - proxy
+

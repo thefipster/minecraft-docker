@@ -1,0 +1,98 @@
+version: "2"
+
+networks:
+  default:
+    driver: bridge
+  infra_proxy:
+    external: true
+
+services:
+
+  smp_rcon:
+    image: registry.thefipster.com/minecraft/tools/rcon-api:0.0.2
+    restart: unless-stopped
+    environment: 
+      VIRTUAL_HOST: smp-rcon.thefipster.com
+      LETSENCRYPT_HOST: smp-rcon.thefipster.com
+    volumes:
+      - /opt/minecraft/server/smp/rcon/appsettings.json:/app/appsettings.json
+      - /opt/minecraft/server/smp/rcon/data:/data
+    networks:
+      - default
+      - infra_proxy
+      
+  smp_admin:
+    image: filebrowser/filebrowser:v2.11.0-alpine
+    restart: unless-stopped
+    environment:
+      VIRTUAL_HOST: smp-admin.thefipster.com
+      LETSENCRYPT_HOST: smp-admin.thefipster.com
+    volumes:
+      - /opt/minecraft/server/smp:/srv
+    networks:
+      - default
+      - infra_proxy
+      
+  smp_stats:
+    image: joshi425/minecraft_exporter
+    restart: unless-stopped
+    environment:
+      RCON_HOST: smp_minecraft
+      RCON_PORT: 25575
+      RCON_PASSWORD: minecraft
+      DYNMAP_ENABLED: "True"
+    volumes:
+      - /opt/minecraft/server/smp/world:/world
+    networks:
+      - default
+
+  smp_grafana:
+    image: grafana/grafana:7.4.2
+    restart: unless-stopped
+    environment:
+      VIRTUAL_HOST: smp-grafana.thefipster.com
+      VIRTUAL_PORT: 3000
+      LETSENCRYPT_HOST: smp.grafana.thefipster.com
+      GF_SERVER_ROOT_URL: https://smp.grafana.thefipster.com
+      GF_SECURITY_ADMIN_USER: bobama420
+      GF_SECURITY_ADMIN_PASSWORD: start123X
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    networks:
+      - default
+      - infra_proxy
+
+  smp_prometheus:
+    image: prom/prometheus:v2.24.1
+    restart: unless-stopped
+    volumes:
+      - /opt/minecraft/server/smp/prometheus/config:/etc/prometheus
+      - /opt/minecraft/server/smp/prometheus/data:/prometheus
+    networks:
+      - default
+
+  smp_minecraft:
+    image: registry.thefipster.com/minecraft/fabric:1.16.4_dynmap
+    restart: unless-stopped
+    ports:
+      - "25565:25565"
+    environment: 
+      VIRTUAL_HOST: smp.thefipster.com
+      VIRTUAL_PORT: 8123
+      LETSENCRYPT_HOST: smp.thefipster.com
+    volumes:
+      - /opt/minecraft/server/smp/server/eula.txt:/data/eula.txt
+      - /opt/minecraft/server/smp/server/server.properties:/data/server.properties
+      - /opt/minecraft/server/smp/server/ops.json:/data/ops.json
+      - /opt/minecraft/server/smp/server/whitelist.json:/data/whitelist.json
+      - /opt/minecraft/server/smp/server/banned-players.json:/data/banned-players.json
+      - /opt/minecraft/server/smp/server/banned-ips.json:/data/banned-ips.json
+      - /opt/minecraft/server/smp/world:/data/world
+      - /opt/minecraft/server/smp/config:/data/config
+      - /opt/minecraft/server/smp/mods:/data/mods
+      - /opt/minecraft/server/smp/dynmap:/data/dynmap
+      - /opt/minecraft/server/smp/logs:/data/logs
+      - /opt/minecraft/server/smp/debug:/data/debug
+      - /opt/minecraft/server/smp/backup:/data/backup
+    networks:
+      - default
+      - infra_proxy

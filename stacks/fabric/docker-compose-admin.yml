@@ -1,0 +1,17 @@
+version: "3.8"
+
+services:
+
+  portainer:
+    image: portainer/portainer-ce
+    command: -H unix:///var/run/docker.sock
+    restart: unless-stopped
+    ports:
+      - 9000:9000
+    environment:
+      VIRTUAL_HOST: ${PORTAINER_DOMAIN}
+      VIRTUAL_PORT: 9000
+      LETSENCRYPT_HOST: ${PORTAINER_DOMAIN}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${PORTAINER_VOLUME}:/data

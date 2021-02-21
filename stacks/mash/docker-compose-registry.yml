@@ -1,0 +1,38 @@
+version: "2"
+
+networks:
+  infra_default:
+    external: true
+
+services:
+
+  repo:
+    restart: always
+    image: registry:2
+    ports:
+      - 5000:5000
+    environment:
+      VIRTUAL_HOST: registry.thefipster.com
+      VIRTUAL_PORT: 5000
+      LETSENCRYPT_HOST: registry.thefipster.com
+    volumes:
+      - /opt/minecraft/hosting/registry:/var/lib/registry
+    networks:
+      - infra_default
+
+  web:
+    image: jc21/registry-ui
+    restart: always
+    ports:
+      - 5001:80
+    environment:
+      VIRTUAL_HOST: registry-ui.thefipster.local
+      VIRTUAL_PORT: 5001
+      REGISTRY_HOST: registry.thefipster.com
+      REGISTRY_SSL: "true"
+      REGISTRY_DOMAIN: registry.thefipster.com
+      REGISTRY_STORAGE_DELETE_ENABLED:
+      REGISTRY_USER: 
+      REGISTRY_PASS: 
+    networks:
+      - infra_default

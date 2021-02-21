@@ -1,0 +1,23 @@
+version: "2"
+
+networks:
+  default:
+    driver: bridge
+
+services:
+
+  portainer:
+    image: portainer/portainer-ce
+    command: -H unix:///var/run/docker.sock
+    restart: always
+    ports:
+      - 9000:9000
+    environment:
+      VIRTUAL_HOST: docker.thefipster.local,docker.thefipster.com
+      VIRTUAL_PORT: 9000
+      LETSENCRYPT_HOST: docker.thefipster.com
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /opt/minecraft/hosting/portainer:/data
+    networks:
+      - default
