@@ -1,18 +1,22 @@
-version: "2"
+version: "3.8"
 
 networks:
   proxy:
-    driver: bridge
+    external: true
   monitoring:
-    driver: bridge
+    external: true
 
 services:
 
   registry:
     restart: unless-stopped
     image: registry:2
+    ports:
+      - 5000:5000
     volumes:
       - ${REGISTRY_VOLUME}:/var/lib/registry
+    networks:
+      - proxy
 
   filebrowser:
     image: filebrowser/filebrowser
@@ -29,8 +33,8 @@ services:
     image: jwilder/nginx-proxy:alpine
     restart: unless-stopped
     ports:
-      - "80:80"
-      - "443:443"
+      - 80:80
+      - 443:443
     environment:
       DHPARAM_GENERATION: "false"
     volumes:
@@ -38,7 +42,7 @@ services:
       - /etc/nginx/vhost.d
       - /usr/share/nginx/html
       - /var/run/docker.sock:/tmp/docker.sock:ro
-      - ./config/client_max_body_size.conf:/etc/nginx/conf.d/client_max_body_size.conf:ro
+      - ./config/proxy/client_max_body_size.conf:/etc/nginx/conf.d/client_max_body_size.conf:ro
     networks:
       - proxy
       
@@ -52,17 +56,14 @@ services:
     volumes:
       - /etc/acme.sh
       - /var/run/docker.sock:/var/run/docker.sock:ro
+    network_mode: "none"
 
   prometheus:
     image: prom/prometheus:v2.24.1
     restart: unless-stopped
-    environment:
-      VIRTUAL_HOST: prometheus.thefipster.com
-      VIRTUAL_PORT: 9090
-      LETSENCRYPT_HOST: prometheus.thefipster.com
     volumes:
       - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-      - /opt/minecraft/hosting/prometheus/data:/prometheus
+      - ${PROMETHEUS_VOLUME}:/prometheus
     networks:
       - monitoring
 
@@ -101,12 +102,12 @@ services:
     image: grafana/grafana:7.4.2
     restart: unless-stopped
     environment:
-      VIRTUAL_HOST: grafana.thefipster.com
+      VIRTUAL_HOST: ${GRAFANA_DOMAIN}
       VIRTUAL_PORT: 3000
-      LETSENCRYPT_HOST: grafana.thefipster.com
-      GF_SERVER_ROOT_URL: https://grafana.thefipster.com
-      GF_SECURITY_ADMIN_USER: bobama420
-      GF_SECURITY_ADMIN_PASSWORD: start123X
+      LETSENCRYPT_HOST: ${GRAFANA_DOMAIN}
+      GF_SERVER_ROOT_URL: https://${GRAFANA_DOMAIN}
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_USERNAME}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD}
       GF_USERS_ALLOW_SIGN_UP: "false"
     networks:
       - monitoring

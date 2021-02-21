@@ -1,0 +1,98 @@
+version: "3.8"
+
+networks:
+  default:
+    driver: bridge
+  proxy:
+    external: true
+
+services:
+
+  rcon:
+    image: minecraft/tools/rcon-api:0.0.2
+    restart: unless-stopped
+    environment: 
+      VIRTUAL_HOST: ${RCON_DOMAIN}
+      LETSENCRYPT_HOST: ${RCON_DOMAIN}
+    volumes:
+      - ./config/rcon-api/appsettings.json:/app/appsettings.json
+      - ${RCON_VOLUME}:/data
+    networks:
+      - default
+      - proxy
+      
+  files:
+    image: filebrowser/filebrowser:v2.11.0-alpine
+    restart: unless-stopped
+    environment:
+      VIRTUAL_HOST: ${FILEBROWSER_DOMAIN}
+      LETSENCRYPT_HOST: ${FILEBROWSER_DOMAIN}
+    volumes:
+      - ${SMP_VOLUME}:/srv
+    networks:
+      - default
+      - proxy
+      
+  stats:
+    image: joshi425/minecraft_exporter
+    restart: unless-stopped
+    environment:
+      RCON_HOST: minecraft
+      RCON_PORT: 25575
+      RCON_PASSWORD: minecraft
+      DYNMAP_ENABLED: "True"
+    volumes:
+      - ${WORLD_VOLUME}:/world
+    networks:
+      - default
+
+  grafana:
+    image: grafana/grafana:7.4.2
+    restart: unless-stopped
+    environment:
+      VIRTUAL_HOST: ${GRAFANA_DOMAIN}
+      VIRTUAL_PORT: 3000
+      LETSENCRYPT_HOST: ${GRAFANA_DOMAIN}
+      GF_SERVER_ROOT_URL: https://${GRAFANA_DOMAIN}
+      GF_SECURITY_ADMIN_USER: ${GRAFAMA_USERNAME}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    networks:
+      - default
+      - proxy
+
+  prometheus:
+    image: prom/prometheus:v2.24.1
+    restart: unless-stopped
+    volumes:
+      - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ${PROMETHEUS_VOLUME}:/prometheus
+    networks:
+      - default
+
+  minecraft:
+    image: minecraft/fabric:1.16.4_dynmap
+    restart: unless-stopped
+    ports:
+      - "25565:25565"
+    environment: 
+      VIRTUAL_HOST: ${DYNMAP_DOMAIN}
+      VIRTUAL_PORT: 8123
+      LETSENCRYPT_HOST: ${DYNMAP_DOMAIN}
+    volumes:
+      - ${MINECRAFT_VOLUME}/eula.txt:/data/eula.txt
+      - ${MINECRAFT_VOLUME}/server.properties:/data/server.properties
+      - ${MINECRAFT_VOLUME}/ops.json:/data/ops.json
+      - ${MINECRAFT_VOLUME}/whitelist.json:/data/whitelist.json
+      - ${MINECRAFT_VOLUME}/banned-players.json:/data/banned-players.json
+      - ${MINECRAFT_VOLUME}/banned-ips.json:/data/banned-ips.json
+      - ${SMP_VOLUME}/config:/data/config
+      - ${SMP_VOLUME}/mods:/data/mods
+      - ${SMP_VOLUME}/logs:/data/logs
+      - ${SMP_VOLUME}/debug:/data/debug
+      - ${WORLD_VOLUME}:/data/world
+      - ${DYNMAP_VOLUME}:/data/dynmap
+      - ${BACKUP_VOLUME}:/data/backup
+    networks:
+      - default
+      - proxy
