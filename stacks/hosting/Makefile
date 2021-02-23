@@ -1,8 +1,14 @@
 install:
-		docker-compose up -d
+	mkdir -p /minecraft/admin/prometheus
+	mkdir -p /minecraft/admin/registry
+	chown nobody /minecraft/admin/prometheus
+	docker-compose up -d
 
 update:
-		docker-compose down	
-		docker-compose up -d
+	docker-compose down
+	docker-compose up -d
+
+uninstall:
+	docker-compose down
 
 setenv:

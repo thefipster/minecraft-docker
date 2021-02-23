@@ -1,4 +1,4 @@
-version: "3.8"
+version: "2.4"
 
 networks:
   proxy:
@@ -56,7 +56,6 @@ services:
     volumes:
       - /etc/acme.sh
       - /var/run/docker.sock:/var/run/docker.sock:ro
-    network_mode: "none"
 
   prometheus:
     image: prom/prometheus:v2.24.1
