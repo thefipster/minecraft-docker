@@ -30,13 +30,14 @@ services:
       - proxy
 
   proxy:
-    image: jwilder/nginx-proxy:alpine
+    image: jwilder/nginx-proxy
     restart: unless-stopped
     ports:
       - 80:80
       - 443:443
     environment:
       DHPARAM_GENERATION: "false"
+      ENABLE_IPV6: "true"
     volumes:
       - /etc/nginx/certs
       - /etc/nginx/vhost.d
