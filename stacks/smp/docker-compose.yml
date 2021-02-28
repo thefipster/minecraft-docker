@@ -3,13 +3,15 @@ version: "3.8"
 networks:
   default:
     driver: bridge
+  monitoring:
+    driver: bridge
   proxy:
     external: true
 
 services:
 
   rcon:
-    image: minecraft/tools/rcon-api:0.0.2
+    image: ${REGISTRY}/thefipster/minecraft/tools/rcon-api:0.0.2
     restart: unless-stopped
     environment: 
       VIRTUAL_HOST: ${RCON_DOMAIN}
@@ -30,7 +32,6 @@ services:
     volumes:
       - ${SMP_VOLUME}:/srv
     networks:
-      - default
       - proxy
       
   stats:
@@ -45,6 +46,7 @@ services:
       - ${WORLD_VOLUME}:/world
     networks:
       - default
+      - monitoring
 
   grafana:
     image: grafana/grafana:7.4.2
@@ -58,7 +60,7 @@ services:
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD}
       GF_USERS_ALLOW_SIGN_UP: "false"
     networks:
-      - default
+      - monitoring
       - proxy
 
   prometheus:
@@ -68,10 +70,10 @@ services:
       - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - ${PROMETHEUS_VOLUME}:/prometheus
     networks:
-      - default
+      - monitoring
 
   minecraft:
-    image: minecraft/fabric_dynmap:1.16.4
+    image: ${REGISTRY}/thefipster/minecraft/fabric_dynmap:1.16.4
     restart: unless-stopped
     ports:
       - "25565:25565"
