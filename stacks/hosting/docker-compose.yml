@@ -1,10 +1,16 @@
 version: "2"
 
 networks:
+
   proxy:
     external: true
   monitoring:
     external: true
+
+volumes:
+  - proxy_certs
+  - proxy_vhost
+  - proxy_html
 
 services:
 
@@ -43,9 +49,9 @@ services:
       DHPARAM_GENERATION: "false"
       ENABLE_IPV6: "true"
     volumes:
-      - /etc/nginx/certs
-      - /etc/nginx/vhost.d
-      - /usr/share/nginx/html
+      - proxy_certs:/etc/nginx/certs
+      - proxy_vhost:/etc/nginx/vhost.d
+      - proxy_html:/usr/share/nginx/html
       - /var/run/docker.sock:/tmp/docker.sock:ro
       - ./config/proxy/client_max_body_size.conf:/etc/nginx/conf.d/client_max_body_size.conf:ro
     networks:
@@ -56,9 +62,10 @@ services:
     restart: unless-stopped
     environment:
       DEFAULT_EMAIL: ${LETSENCRYPT_EMAIL}
-    volumes_from:
-      - proxy
     volumes:
+      - proxy_certs:/etc/nginx/certs
+      - proxy_vhost:/etc/nginx/vhost.d
+      - proxy_html:/usr/share/nginx/html
       - /etc/acme.sh
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
