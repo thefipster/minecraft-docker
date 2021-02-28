@@ -37,7 +37,7 @@ services:
       - proxy
 
   proxy:
-    image: jwilder/nginx-proxy
+    image: jwilder/nginx-proxy:alpine
     restart: unless-stopped
     ports:
       - 80:80
