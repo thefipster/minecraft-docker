@@ -11,6 +11,8 @@ services:
   registry:
     restart: unless-stopped
     image: registry:2
+    ports:
+      - 5000:5000
     environment:
       VIRTUAL_HOST: ${REGISTRY_DOMAIN}
       VIRTUAL_PORT: 5000
