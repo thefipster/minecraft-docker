@@ -32,7 +32,7 @@ services:
       - proxy
 
   proxy:
-    image: jwilder/nginx-proxy:latest
+    image: jwilder/nginx-proxy
     restart: unless-stopped
     ports:
       - 80:80

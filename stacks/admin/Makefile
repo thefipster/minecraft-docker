@@ -1,6 +1,7 @@
 install:
 	mkdir -p /minecraft/admin/portainer
 	docker network create --driver bridge --ipv6 --subnet 2a02:908:743:74e1:f0::/80 proxy
+#	docker network create --driver bridge proxy
 	docker network create --driver bridge monitoring
 	docker-compose up -d
 
