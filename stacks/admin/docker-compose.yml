@@ -1,4 +1,4 @@
-version: "3"
+version: "2"
 
 networks:
   proxy:
@@ -10,8 +10,6 @@ services:
     image: portainer/portainer-ce
     command: -H unix:///var/run/docker.sock
     restart: unless-stopped
-    ports:
-      - 9000:9000
     environment:
       VIRTUAL_HOST: ${PORTAINER_DOMAIN}
       VIRTUAL_PORT: 9000
@@ -19,5 +17,5 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ${PORTAINER_VOLUME}:/data
-    networks: 
+    networks:
       - proxy

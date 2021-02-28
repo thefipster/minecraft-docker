@@ -71,7 +71,7 @@ services:
       - default
 
   minecraft:
-    image: minecraft/fabric:1.16.4_dynmap
+    image: minecraft/fabric_dynmap:1.16.4
     restart: unless-stopped
     ports:
       - "25565:25565"

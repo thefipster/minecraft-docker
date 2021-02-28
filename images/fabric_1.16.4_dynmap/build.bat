@@ -1,3 +1,3 @@
-docker build -t minecraft/fabric:1.16.4_dynmap .
-docker tag minecraft/fabric:1.16.4_dynmap 192.168.1.30:5000/minecraft/fabric:1.16.4_dynmap
-docker push 192.168.1.30:5000/minecraft/fabric:1.16.4_dynmap
+docker build -t minecraft/fabric_dynmap:1.16.4 .
+rem docker tag minecraft/fabric_dynmap:1.16.4 registry.thefipster.com/minecraft/fabric_dynmap:1.16.4
+rem docker push registry.thefipster.com/minecraft/fabric_dynmap:1.16.4

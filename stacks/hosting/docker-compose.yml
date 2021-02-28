@@ -1,4 +1,4 @@
-version: "2.4"
+version: "2"
 
 networks:
   proxy:
@@ -11,8 +11,10 @@ services:
   registry:
     restart: unless-stopped
     image: registry:2
-    ports:
-      - 5000:5000
+    environment:
+      VIRTUAL_HOST: ${REGISTRY_DOMAIN}
+      VIRTUAL_PORT: 5000
+      LETSENCRYPT_HOST: ${REGISTRY_DOMAIN}
     volumes:
       - ${REGISTRY_VOLUME}:/var/lib/registry
     networks:
@@ -30,13 +32,14 @@ services:
       - proxy
 
   proxy:
-    image: jwilder/nginx-proxy:alpine
+    image: jwilder/nginx-proxy:latest
     restart: unless-stopped
     ports:
       - 80:80
       - 443:443
     environment:
       DHPARAM_GENERATION: "false"
+      ENABLE_IPV6: "true"
     volumes:
       - /etc/nginx/certs
       - /etc/nginx/vhost.d
@@ -45,7 +48,7 @@ services:
       - ./config/proxy/client_max_body_size.conf:/etc/nginx/conf.d/client_max_body_size.conf:ro
     networks:
       - proxy
-      
+
   letsencrypt:
     image: jrcs/letsencrypt-nginx-proxy-companion
     restart: unless-stopped
@@ -56,6 +59,8 @@ services:
     volumes:
       - /etc/acme.sh
       - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - proxy
 
   prometheus:
     image: prom/prometheus:v2.24.1
@@ -111,4 +116,3 @@ services:
     networks:
       - monitoring
       - proxy
-
