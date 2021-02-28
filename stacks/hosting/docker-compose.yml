@@ -10,6 +10,7 @@ volumes:
   certs:
   vhost:
   nginx:
+  dhparam:
 
 services:
 
@@ -18,14 +19,9 @@ services:
     image: registry:2
     ports:
       - 5000:5000
-    environment:
-      VIRTUAL_HOST: ${REGISTRY_DOMAIN}
-      VIRTUAL_PORT: 5000
-      LETSENCRYPT_HOST: ${REGISTRY_DOMAIN}
     volumes:
       - ${REGISTRY_VOLUME}:/var/lib/registry
-    networks:
-      - proxy
+    network_mode: host
 
   filebrowser:
     image: filebrowser/filebrowser
@@ -35,6 +31,8 @@ services:
       LETSENCRYPT_HOST: ${FILEBROWSER_DOMAIN}
     volumes:
       - ${FILEBROWSER_VOLUME}:/srv
+    depends_on:
+      - proxy
     networks:
       - proxy
 
@@ -51,8 +49,11 @@ services:
       - certs:/etc/nginx/certs
       - vhost:/etc/nginx/vhost.d
       - nginx:/usr/share/nginx/html
+      - dhparam:/etc/nginx/dhparam
       - /var/run/docker.sock:/tmp/docker.sock:ro
       - ./config/proxy/client_max_body_size.conf:/etc/nginx/conf.d/client_max_body_size.conf:ro
+    labels:
+      - "com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy"
     networks:
       - proxy
 
@@ -95,6 +96,8 @@ services:
       - '--path.rootfs=/rootfs'
       - '--collector.filesystem.ignored-mount-points="^(/rootfs|/host|)/(sys|proc|dev|host|etc)($$|/)"'
       - '--collector.filesystem.ignored-fs-types="^(sys|proc|auto|cgroup|devpts|ns|au|fuse\.lxc|mqueue)(fs|)$$"'
+    depends_on:
+      - prometheus
     networks:
       - monitoring
 
@@ -108,6 +111,8 @@ services:
       - /var/run:/var/run:rw
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
+    depends_on:
+      - prometheus
     networks:
       - monitoring
 
@@ -122,6 +127,9 @@ services:
       GF_SECURITY_ADMIN_USER: ${GRAFANA_USERNAME}
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD}
       GF_USERS_ALLOW_SIGN_UP: "false"
+    depends_on:
+      - prometheus
+      - proxy
     networks:
       - monitoring
       - proxy
