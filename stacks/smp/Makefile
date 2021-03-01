@@ -10,6 +10,7 @@ install:
 	mkdir -p /minecraft/maps/smp
 	mkdir -p /minecraft/backups/smp
 	cp ./config/minecraft/* /minecraft/hosts/smp/server/
+	chown nobody /minecraft/hosts/smp/prometheus
 	docker-compose up -d
 
 update:
