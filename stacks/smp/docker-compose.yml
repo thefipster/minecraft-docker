@@ -7,6 +7,8 @@ networks:
     driver: bridge
   proxy:
     external: true
+  minecraft:
+    external: true
 
 services:
 
@@ -30,7 +32,10 @@ services:
       VIRTUAL_HOST: ${FILEBROWSER_DOMAIN}
       LETSENCRYPT_HOST: ${FILEBROWSER_DOMAIN}
     volumes:
-      - ${SMP_VOLUME}:/srv
+      - ${SMP_VOLUME}:/srv/host
+      - ${WORLD_VOLUME}:/srv/worlds
+      - ${DYNMAP_VOLUME}:/srv/maps
+      - ${BACKUP_VOLUME}:/srv/backups
     networks:
       - proxy
       
@@ -98,3 +103,5 @@ services:
     networks:
       - default
       - proxy
+      minecraft:
+        ipv6_address: 2a02:908:743:74e1:affe::beef
