@@ -103,6 +103,9 @@ services:
 
   cadvisor:
     image: google/cadvisor:latest
+    command:
+      - '-housekeeping_interval=10s'
+      - '-docker_only=true'
     restart: unless-stopped
     volumes:
       - /etc/localtime:/etc/localtime:ro

@@ -12,19 +12,28 @@ networks:
 
 services:
 
-  rcon:
-    image: ${REGISTRY}/thefipster/minecraft/tools/rcon-api:0.0.2
+  portal:
+    image: ${REGISTRY}/thefipster/minecraft/tools/link-portal:0.0.1
     restart: unless-stopped
-    environment: 
+    environment:
+      VIRTUAL_HOST: ${PORTAL_DOMAIN}
+      LETSENCRYPT_HOST: ${PORTAL_DOMAIN}
+    networks:
+      - proxy
+
+  rcon:
+    image: ${REGISTRY}/thefipster/minecraft/tools/rcon-api:0.0.3
+    restart: unless-stopped
+    environment:
       VIRTUAL_HOST: ${RCON_DOMAIN}
       LETSENCRYPT_HOST: ${RCON_DOMAIN}
     volumes:
-      - ./config/rcon-api/appsettings.json:/app/appsettings.json
-      - ${RCON_VOLUME}:/data
+      - ${RCON_VOLUME}/appsettings.json:/app/appsettings.json
+      - ${RCON_VOLUME}/data:/data
     networks:
       - default
       - proxy
-      
+
   files:
     image: filebrowser/filebrowser:v2.11.0-alpine
     restart: unless-stopped
@@ -38,7 +47,7 @@ services:
       - ${BACKUP_VOLUME}:/srv/backups
     networks:
       - proxy
-      
+
   stats:
     image: joshi425/minecraft_exporter
     restart: unless-stopped
@@ -82,7 +91,8 @@ services:
     restart: unless-stopped
     ports:
       - "25565:25565"
-    environment: 
+      - "25575:25575"
+    environment:
       VIRTUAL_HOST: ${DYNMAP_DOMAIN}
       VIRTUAL_PORT: 8123
       LETSENCRYPT_HOST: ${DYNMAP_DOMAIN}
@@ -101,7 +111,7 @@ services:
       - ${DYNMAP_VOLUME}:/data/dynmap
       - ${BACKUP_VOLUME}:/data/backup
     networks:
-      - default
-      - proxy
+      default:
+      proxy:
       minecraft:
         ipv6_address: 2a02:908:743:74e1:affe::beef
