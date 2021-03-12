@@ -46,7 +46,7 @@ services:
       DHPARAM_GENERATION: "false"
       ENABLE_IPV6: "true"
     volumes:
-      - .config/htpasswd:/etc/nginx/htpasswd
+      - ./config/htpasswd:/etc/nginx/htpasswd
       - certs:/etc/nginx/certs
       - vhost:/etc/nginx/vhost.d
       - nginx:/usr/share/nginx/html
