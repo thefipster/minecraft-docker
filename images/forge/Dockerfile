@@ -2,6 +2,8 @@ FROM openjdk:8u212-jre-alpine
 
 WORKDIR /data
 EXPOSE 25565
+EXPOSE 25575
+EXPOSE 8123
 
 RUN apk -U --no-cache upgrade
 

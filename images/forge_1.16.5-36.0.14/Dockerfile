@@ -10,13 +10,13 @@ RUN apk -U --no-cache upgrade
 RUN apk add --no-cache -U \
   ttf-dejavu
 
-ARG FABRIC_VERSION=0.7.2
-ARG MINECRAFT_SERVER_URL=https://launcher.mojang.com/v1/objects/35139deedbd5182953cf1caa23835da59ca3d7cd/server.jar
+ARG FORGE_VERSION=36.0.14
+ARG MINECRAFT_VERSION=1.16.5
 
-RUN wget -O fabric-installer.jar https://maven.fabricmc.net/net/fabricmc/fabric-installer/$FABRIC_VERSION/fabric-installer-$FABRIC_VERSION.jar \
-  && wget -O server.jar $MINECRAFT_SERVER_URL \
-  && java -jar fabric-installer.jar server \
-  && rm fabric-installer.jar
+RUN wget -O forge-installer.jar https://files.minecraftforge.net/maven/net/minecraftforge/forge/$MINECRAFT_VERSION-$FORGE_VERSION/forge-$MINECRAFT_VERSION-$FORGE_VERSION-installer.jar \
+    && java -jar forge-installer.jar --installServer \
+    && rm forge-installer.jar \
+    && mv forge-$MINECRAFT_VERSION-$FORGE_VERSION.jar server.jar
 
 ENTRYPOINT [ \
   "java", \
@@ -43,5 +43,5 @@ ENTRYPOINT [ \
   "-Dusing.aikars.flags=https://mcflags.emc.gs", \
   "-Daikars.new.flags=true", \
   "-jar", \
-  "fabric-server-launch.jar" \
+  "server.jar" \
 ]
