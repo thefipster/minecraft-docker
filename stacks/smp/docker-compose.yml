@@ -28,7 +28,7 @@ services:
       VIRTUAL_HOST: ${RCON_DOMAIN}
       LETSENCRYPT_HOST: ${RCON_DOMAIN}
     volumes:
-      - ${RCON_VOLUME}/appsettings.json:/app/appsettings.json
+      - ./config/rcon-api/appsettings.json:/app/appsettings.json
       - ${RCON_VOLUME}/data:/data
     networks:
       - default
@@ -87,14 +87,14 @@ services:
       - monitoring
 
   minecraft:
-    image: ${REGISTRY}/thefipster/minecraft/fabric_dynmap:0.7.2
+    image: ${REGISTRY}/thefipster/minecraft/fabric:${FABRIC_VERSION}
     restart: unless-stopped
     ports:
       - "25565:25565"
-    environment:
-      VIRTUAL_HOST: ${DYNMAP_DOMAIN}
-      VIRTUAL_PORT: 8123
-      LETSENCRYPT_HOST: ${DYNMAP_DOMAIN}
+#    environment:
+#      VIRTUAL_HOST: ${DYNMAP_DOMAIN}
+#      VIRTUAL_PORT: 8123
+#      LETSENCRYPT_HOST: ${DYNMAP_DOMAIN}
     volumes:
       - ${MINECRAFT_VOLUME}/eula.txt:/data/eula.txt
       - ${MINECRAFT_VOLUME}/server.properties:/data/server.properties
@@ -113,4 +113,4 @@ services:
       default:
       proxy:
       minecraft:
-        ipv6_address: 2a02:908:743:74e1:affe::beef
+        ipv6_address: 2a01:4f8:212:391c:affe::beef

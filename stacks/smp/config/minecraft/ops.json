@@ -4,5 +4,12 @@
     "name": "bobama420",
     "level": 4,
     "bypassesPlayerLimit": true
+  },
+  {
+    "uuid": "b86cee08-ad4c-4452-995f-3c3661a504b5",
+    "name": "thefipster",
+    "level": 4,
+    "bypassesPlayerLimit": false
   }
 ]
+

@@ -17,4 +17,6 @@ update:
 	docker-compose down
 	docker-compose up -d
 
-setenv:
+uninstall:
+	docker-compose down
+

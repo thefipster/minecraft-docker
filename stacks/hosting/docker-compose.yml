@@ -17,10 +17,8 @@ services:
   registry:
     restart: unless-stopped
     image: registry:2
-    environment:
-      VIRTUAL_HOST: ${REGISTRY_DOMAIN}
-      VIRTUAL_PORT: 5000
-      LETSENCRYPT_HOST: ${REGISTRY_DOMAIN}
+    ports:
+      - 5000:5000
     volumes:
       - ${REGISTRY_VOLUME}:/var/lib/registry
     networks:
