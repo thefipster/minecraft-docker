@@ -1,0 +1,21 @@
+version: "3"
+
+services:
+
+  minecraft:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "25565:25565"
+    volumes:
+      - /e/minecraft/server/eula.txt:/data/eula.txt
+      - /e/minecraft/server/server.properties:/data/server.properties
+      - /e/minecraft/server/ops.json:/data/ops.json
+      - /e/minecraft/server/whitelist.json:/data/whitelist.json
+      - /e/minecraft/server/banned-players.json:/data/banned-players.json
+      - /e/minecraft/server/banned-ips.json:/data/banned-ips.json
+      - /e/minecraft/server/config:/data/config
+      - /e/minecraft/server/mods:/data/mods
+      - /e/minecraft/server/logs:/data/logs
+      - /e/minecraft/server/debug:/data/debug
+      - /e/minecraft/server/world:/data/world
