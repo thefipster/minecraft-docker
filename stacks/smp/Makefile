@@ -14,9 +14,9 @@ install:
 	docker-compose up -d
 
 update:
+	docker-compose pull
 	docker-compose down
 	docker-compose up -d
 
 uninstall:
 	docker-compose down
-
